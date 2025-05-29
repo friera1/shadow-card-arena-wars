@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Users, Crown, Star, Swords, Shield } from "lucide-react";
+import { ArrowLeft, Users, Crown, Star, Swords, Shield, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSound } from "@/hooks/useSound";
+import AllianceBattleGrid from "@/components/AllianceBattleGrid";
 
 interface Hero {
   id: number;
@@ -15,9 +17,19 @@ interface Hero {
   alliance: string;
 }
 
+interface Alliance {
+  id: number;
+  name: string;
+  totalPower: number;
+  color: string;
+  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+}
+
 const AllianceBattles = () => {
   const navigate = useNavigate();
-  const [selectedAlliance, setSelectedAlliance] = useState<string>('');
+  const { playSound } = useSound();
+  const [gameStarted, setGameStarted] = useState(false);
+  const [selectedHeroes, setSelectedHeroes] = useState<Hero[]>([]);
 
   const myHeroes: Hero[] = [
     { id: 1, name: "Артас Король", level: 25, power: 1200, role: "leader", alliance: "Северное Королевство", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=150&h=200&fit=crop" },
@@ -28,13 +40,13 @@ const AllianceBattles = () => {
     { id: 6, name: "Жрица Люна", level: 19, power: 700, role: "support", alliance: "Лунный Храм", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=150&h=200&fit=crop" },
   ];
 
-  const enemyTeam: Hero[] = [
-    { id: 7, name: "Темный Лорд", level: 30, power: 1500, role: "leader", alliance: "Армия Тьмы", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=200&fit=crop" },
-    { id: 8, name: "Орк Разрушитель", level: 25, power: 1100, role: "tank", alliance: "Армия Тьмы", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=150&h=200&fit=crop" },
-    { id: 9, name: "Некромант", level: 22, power: 900, role: "support", alliance: "Армия Тьмы", image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=150&h=200&fit=crop" },
+  // Генерируем альянсы для битвы
+  const battleAlliances: Alliance[] = [
+    { id: 1, name: "Северное Королевство", totalPower: 3200, color: "bg-blue-600", position: "top-left" },
+    { id: 2, name: "Армия Тьмы", totalPower: 3400, color: "bg-red-600", position: "top-right" },
+    { id: 3, name: "Лесной Союз", totalPower: 3100, color: "bg-green-600", position: "bottom-left" },
+    { id: 4, name: "Огненные Драконы", totalPower: 3300, color: "bg-orange-600", position: "bottom-right" },
   ];
-
-  const [selectedHeroes, setSelectedHeroes] = useState<Hero[]>([]);
 
   const roleColors = {
     leader: "border-yellow-500 bg-yellow-900/30",
@@ -50,22 +62,34 @@ const AllianceBattles = () => {
     support: Star
   };
 
-  const alliances = Array.from(new Set(myHeroes.map(hero => hero.alliance)));
-
-  const filteredHeroes = selectedAlliance 
-    ? myHeroes.filter(hero => hero.alliance === selectedAlliance)
-    : myHeroes;
+  // Сортируем героев по силе и берем топ-3
+  const topHeroes = [...myHeroes].sort((a, b) => b.power - a.power).slice(0, 3);
 
   const toggleHeroSelection = (hero: Hero) => {
     if (selectedHeroes.find(h => h.id === hero.id)) {
       setSelectedHeroes(selectedHeroes.filter(h => h.id !== hero.id));
-    } else if (selectedHeroes.length < 5) {
+    } else if (selectedHeroes.length < 3) {
       setSelectedHeroes([...selectedHeroes, hero]);
+      playSound('click');
     }
   };
 
-  const totalPower = selectedHeroes.reduce((sum, hero) => sum + hero.power, 0);
-  const enemyPower = enemyTeam.reduce((sum, hero) => sum + hero.power, 0);
+  const startBattle = () => {
+    if (selectedHeroes.length === 3) {
+      setGameStarted(true);
+      playSound('success');
+    }
+  };
+
+  if (gameStarted) {
+    return (
+      <AllianceBattleGrid 
+        selectedHeroes={selectedHeroes}
+        alliances={battleAlliances}
+        onBack={() => setGameStarted(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900">
@@ -81,8 +105,8 @@ const AllianceBattles = () => {
               Назад
             </Button>
             <div className="flex items-center gap-2">
-              <Users className="w-8 h-8 text-blue-400" />
-              <h1 className="text-3xl font-bold text-white">Битвы Альянсов</h1>
+              <Flag className="w-8 h-8 text-purple-400" />
+              <h1 className="text-3xl font-bold text-white">Война Альянсов</h1>
             </div>
           </div>
         </div>
@@ -94,34 +118,12 @@ const AllianceBattles = () => {
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  Выбор Героев ({selectedHeroes.length}/5)
+                  Выберите 3 сильнейших героев для войны
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {/* Alliance Filter */}
-                <div className="flex gap-2 mb-4 flex-wrap">
-                  <Button
-                    variant={selectedAlliance === '' ? 'default' : 'outline'}
-                    onClick={() => setSelectedAlliance('')}
-                    className="bg-gray-700 hover:bg-gray-600 border-gray-600 text-white text-sm"
-                  >
-                    Все альянсы
-                  </Button>
-                  {alliances.map((alliance) => (
-                    <Button
-                      key={alliance}
-                      variant={selectedAlliance === alliance ? 'default' : 'outline'}
-                      onClick={() => setSelectedAlliance(alliance)}
-                      className="bg-gray-700 hover:bg-gray-600 border-gray-600 text-white text-sm"
-                    >
-                      {alliance}
-                    </Button>
-                  ))}
-                </div>
-
-                {/* Heroes Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {filteredHeroes.map((hero) => {
+                  {topHeroes.map((hero) => {
                     const RoleIcon = roleIcons[hero.role];
                     const isSelected = selectedHeroes.find(h => h.id === hero.id);
                     
@@ -129,7 +131,7 @@ const AllianceBattles = () => {
                       <Card 
                         key={hero.id} 
                         className={`${roleColors[hero.role]} border-2 cursor-pointer transition-all duration-200 ${
-                          isSelected ? 'ring-2 ring-white scale-105' : 'hover:scale-105'
+                          isSelected ? 'ring-2 ring-purple-400 scale-105' : 'hover:scale-105'
                         }`}
                         onClick={() => toggleHeroSelection(hero)}
                       >
@@ -140,8 +142,8 @@ const AllianceBattles = () => {
                               <RoleIcon className="w-4 h-4 text-white" />
                             </div>
                             {isSelected && (
-                              <div className="absolute inset-0 bg-white/20 rounded flex items-center justify-center">
-                                <div className="bg-green-500 rounded-full p-1">
+                              <div className="absolute inset-0 bg-purple-500/20 rounded flex items-center justify-center">
+                                <div className="bg-purple-500 rounded-full p-1">
                                   <Star className="w-4 h-4 text-white fill-white" />
                                 </div>
                               </div>
@@ -160,6 +162,20 @@ const AllianceBattles = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Battle Info */}
+            <Card className="bg-gray-800/50 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">Правила Войны Альянсов</CardTitle>
+              </CardHeader>
+              <CardContent className="text-gray-300 space-y-2 text-sm">
+                <p>• 4 альянса сражаются на поле 50x50 клеток</p>
+                <p>• Каждый альянс начинает в своем углу карты</p>
+                <p>• У вас есть 5 ходов для захвата территорий</p>
+                <p>• Клетки союзников можно проходить бесплатно</p>
+                <p>• Цель: добраться до центра и захватить Главное Здание</p>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Battle Setup */}
@@ -167,15 +183,15 @@ const AllianceBattles = () => {
             {/* Selected Team */}
             <Card className="bg-gray-800/50 border-gray-700">
               <CardHeader>
-                <CardTitle className="text-white">Ваша Команда</CardTitle>
+                <CardTitle className="text-white">Выбранные Герои ({selectedHeroes.length}/3)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {selectedHeroes.map((hero, index) => (
-                    <div key={hero.id} className="flex items-center gap-3 bg-gray-700/50 p-2 rounded">
+                    <div key={hero.id} className="flex items-center gap-3 bg-purple-900/30 p-2 rounded">
                       <div className="w-12 h-12 relative">
                         <img src={hero.image} alt={hero.name} className="w-full h-full object-cover rounded" />
-                        <div className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        <div className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                           {index + 1}
                         </div>
                       </div>
@@ -185,67 +201,40 @@ const AllianceBattles = () => {
                       </div>
                     </div>
                   ))}
-                  {Array.from({ length: 5 - selectedHeroes.length }, (_, i) => (
+                  {Array.from({ length: 3 - selectedHeroes.length }, (_, i) => (
                     <div key={`empty-${i}`} className="h-16 border-2 border-dashed border-gray-600 rounded flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">Пустое место</span>
+                      <span className="text-gray-500 text-sm">Выберите героя</span>
                     </div>
                   ))}
-                </div>
-                
-                <div className="mt-4 p-3 bg-blue-900/30 rounded">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Общая сила:</span>
-                    <span className="text-blue-400 font-bold">{totalPower}</span>
-                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Enemy Team */}
+            {/* Participating Alliances */}
             <Card className="bg-gray-800/50 border-gray-700">
               <CardHeader>
-                <CardTitle className="text-white">Команда Противника</CardTitle>
+                <CardTitle className="text-white">Участвующие Альянсы</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {enemyTeam.map((hero) => (
-                    <div key={hero.id} className="flex items-center gap-3 bg-red-900/30 p-2 rounded">
-                      <img src={hero.image} alt={hero.name} className="w-12 h-12 object-cover rounded" />
-                      <div className="flex-1">
-                        <p className="text-white text-sm font-medium">{hero.name}</p>
-                        <p className="text-gray-400 text-xs">{hero.power} силы</p>
-                      </div>
+                <div className="space-y-2">
+                  {battleAlliances.map((alliance) => (
+                    <div key={alliance.id} className={`${alliance.color} p-2 rounded flex justify-between items-center`}>
+                      <span className="text-white text-sm font-medium">{alliance.name}</span>
+                      <span className="text-yellow-400 text-xs">{alliance.totalPower}</span>
                     </div>
                   ))}
-                </div>
-                
-                <div className="mt-4 p-3 bg-red-900/30 rounded">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Общая сила:</span>
-                    <span className="text-red-400 font-bold">{enemyPower}</span>
-                  </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Battle Button */}
             <Button 
-              className="w-full bg-blue-700 hover:bg-blue-600 text-white py-4 text-lg"
-              disabled={selectedHeroes.length === 0}
+              className="w-full bg-purple-700 hover:bg-purple-600 text-white py-4 text-lg"
+              disabled={selectedHeroes.length !== 3}
+              onClick={startBattle}
             >
-              Начать Битву Альянсов
+              Начать Войну Альянсов
             </Button>
-
-            {totalPower > 0 && (
-              <div className="text-center">
-                <p className="text-sm text-gray-400">
-                  Шансы на победу: 
-                  <span className={`ml-1 font-bold ${totalPower > enemyPower ? 'text-green-400' : totalPower < enemyPower ? 'text-red-400' : 'text-yellow-400'}`}>
-                    {Math.round((totalPower / (totalPower + enemyPower)) * 100)}%
-                  </span>
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>
