@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Package, Swords, Users, Bell } from "lucide-react";
+import { Package, Swords, Users, Bell, User } from "lucide-react";
 import PlayerStats from "@/components/PlayerStats";
 import { useToast } from "@/hooks/use-toast";
 
@@ -50,6 +50,15 @@ const Index = () => {
       buttonText: 'Формировать',
       hoverColor: 'hover:border-blue-500',
       bgColor: 'bg-blue-700 hover:bg-blue-600'
+    },
+    {
+      path: '/profile',
+      title: 'Мой Профиль',
+      description: 'Настройки профиля и статистика',
+      icon: User,
+      buttonText: 'Профиль',
+      hoverColor: 'hover:border-green-500',
+      bgColor: 'bg-green-700 hover:bg-green-600'
     }
   ];
 
@@ -84,7 +93,7 @@ const Index = () => {
         <PlayerStats />
 
         {/* Menu Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {menuItems.map((item, index) => (
             <Card 
               key={item.path}

@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Inventory from "./pages/Inventory";
 import Battles from "./pages/Battles";
 import AllianceBattles from "./pages/AllianceBattles";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/battles" element={<Battles />} />
           <Route path="/alliance-battles" element={<AllianceBattles />} />
+          <Route path="/profile" element={<Profile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
