@@ -17,6 +17,68 @@ const AllianceBattles = () => {
     rank: 15
   };
 
+  // Sample data for the battle grid
+  const selectedHeroes = [
+    {
+      id: 1,
+      name: "Драконий Воин",
+      level: 25,
+      power: 1500,
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=100&fit=crop",
+      role: 'tank' as const,
+      alliance: "Драконы Севера"
+    },
+    {
+      id: 2,
+      name: "Ледяной Маг",
+      level: 22,
+      power: 1200,
+      image: "https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=100&h=100&fit=crop",
+      role: 'dps' as const,
+      alliance: "Драконы Севера"
+    },
+    {
+      id: 3,
+      name: "Целитель",
+      level: 20,
+      power: 900,
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=100&h=100&fit=crop",
+      role: 'support' as const,
+      alliance: "Драконы Севера"
+    }
+  ];
+
+  const alliances = [
+    {
+      id: 1,
+      name: "Драконы Севера",
+      totalPower: 45000,
+      color: "bg-blue-600",
+      position: 'top-left' as const
+    },
+    {
+      id: 2,
+      name: "Огненный Легион",
+      totalPower: 42000,
+      color: "bg-red-600",
+      position: 'top-right' as const
+    },
+    {
+      id: 3,
+      name: "Теневые Охотники",
+      totalPower: 38000,
+      color: "bg-purple-600",
+      position: 'bottom-left' as const
+    },
+    {
+      id: 4,
+      name: "Золотая Гильдия",
+      totalPower: 40000,
+      color: "bg-yellow-600",
+      position: 'bottom-right' as const
+    }
+  ];
+
   const battleModes = [
     {
       id: 'territory',
@@ -52,6 +114,15 @@ const AllianceBattles = () => {
       title: `Присоединение к ${title}`,
       description: "Формируем команду...",
       duration: 3000,
+    });
+  };
+
+  const handleBackFromGrid = () => {
+    // This function will be called when user wants to go back from the battle grid
+    // For now, we'll just show a toast since we're on the same page
+    toast({
+      title: "Возврат к выбору режима",
+      description: "Выберите режим битвы",
     });
   };
 
@@ -192,7 +263,11 @@ const AllianceBattles = () => {
                 <CardTitle className="text-white text-sm">Поле боя (50x50)</CardTitle>
               </CardHeader>
               <CardContent>
-                <AllianceBattleGrid />
+                <AllianceBattleGrid 
+                  selectedHeroes={selectedHeroes}
+                  alliances={alliances}
+                  onBack={handleBackFromGrid}
+                />
               </CardContent>
             </Card>
           </div>
