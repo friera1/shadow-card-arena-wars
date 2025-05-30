@@ -69,26 +69,26 @@ const Inventory = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900">
-      <div className="container mx-auto px-4 py-6" style={{ minWidth: '500px' }}>
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <Button 
             variant="ghost" 
             onClick={() => {
               playSound('click');
               navigate('/');
             }}
-            className="text-gray-300 hover:text-white hover:bg-gray-700"
+            className="text-gray-300 hover:text-white hover:bg-gray-700 p-2 sm:px-4 sm:py-2"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Назад
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 sm:mr-2" />
+            <span className="hidden sm:inline">Назад</span>
           </Button>
-          <h1 className="text-xl md:text-2xl font-bold text-white">The Collectors World</h1>
-          <div className="text-white text-sm">19:13:09</div>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white text-center flex-1 mx-2">The Collectors World</h1>
+          <div className="text-white text-xs sm:text-sm">19:13:09</div>
         </div>
 
         {/* Search and Filter */}
-        <div className="mb-6 space-y-4">
+        <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
             <input
@@ -96,7 +96,7 @@ const Inventory = () => {
               placeholder="Поиск предметов..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none text-sm sm:text-base"
             />
           </div>
 
@@ -105,13 +105,13 @@ const Inventory = () => {
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
-              className="w-full justify-between border-gray-600 text-gray-300 hover:bg-gray-700"
+              className="w-full justify-between border-gray-600 text-gray-300 hover:bg-gray-700 text-sm sm:text-base"
             >
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4" />
-                {filterOptions.find(f => f.id === selectedFilter)?.label}
+                <span className="truncate">{filterOptions.find(f => f.id === selectedFilter)?.label}</span>
               </div>
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="w-4 h-4 flex-shrink-0" />
             </Button>
             
             {showFilters && (
@@ -126,7 +126,7 @@ const Inventory = () => {
                         setShowFilters(false);
                         playSound('click');
                       }}
-                      className="w-full justify-start text-gray-300 hover:bg-gray-700 hover:text-white"
+                      className="w-full justify-start text-gray-300 hover:bg-gray-700 hover:text-white text-sm"
                     >
                       {filter.label}
                     </Button>
@@ -138,28 +138,29 @@ const Inventory = () => {
         </div>
 
         {/* Inventory Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
           {filteredItems.map((item) => (
             <div 
               key={item.id} 
               className="cursor-pointer transition-transform duration-200 hover:scale-105"
               onClick={() => handleItemClick(item)}
             >
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <div className={`relative border-2 ${rarityColors[item.rarity]} rounded-lg overflow-hidden bg-gray-800`}>
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-[125px] h-[125px] object-cover"
+                    className="w-full aspect-square object-cover"
+                    style={{ minWidth: '80px', maxWidth: '125px' }}
                   />
                   {item.quantity > 1 && (
-                    <div className="absolute top-1 right-1 bg-gray-900/90 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center border border-gray-600 font-bold">
+                    <div className="absolute top-1 right-1 bg-gray-900/90 text-white text-xs rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center border border-gray-600 font-bold">
                       {item.quantity}
                     </div>
                   )}
                 </div>
-                <div className="w-[125px]">
-                  <p className="text-white text-xs font-medium leading-tight break-words overflow-hidden">
+                <div className="w-full">
+                  <p className="text-white text-xs font-medium leading-tight break-words overflow-hidden text-center">
                     {item.name}
                   </p>
                 </div>
@@ -169,9 +170,9 @@ const Inventory = () => {
         </div>
 
         {filteredItems.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">Предметы не найдены</p>
-            <p className="text-gray-500 text-sm mt-2">Попробуйте изменить фильтры или поисковый запрос</p>
+          <div className="text-center py-8 sm:py-12">
+            <p className="text-gray-400 text-base sm:text-lg">Предметы не найдены</p>
+            <p className="text-gray-500 text-xs sm:text-sm mt-2">Попробуйте изменить фильтры или поисковый запрос</p>
           </div>
         )}
       </div>
